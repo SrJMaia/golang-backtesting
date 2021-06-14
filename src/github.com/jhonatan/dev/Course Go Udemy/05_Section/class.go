@@ -5,17 +5,47 @@ import (
   "runtime"
 )
 
-var bool_variable bool
-var int_variable02 int16
-var float_variable02 float32 // must to be 64 or 32
+var boolVariable bool
+var intVariable02 int16
+var floatVariable02 float32 // must to be 64 or 32
+
+const constVariable uint16 = 10
+
+const (
+  const_one = 1
+  const_two = 2
+  const_three = 3 // untyped
+)
+
+const (
+  iotaA = iota
+  iotaB
+  iotaC
+)
+
+const (
+  iotaAA = iota
+  iotaBB = iota
+  iotaCC = iota
+)
+
+const (
+  //kb = 1024
+  //mb = 1024 * kb
+  //gb = 1024 * mb
+  _ = iota
+  kb = 1 << (iota * 10)
+  mb = 1 << (iota * 10)
+  gb = 1 << (iota * 10)
+)
 
 func main()  {
 
   // Bool Type
   fmt.Println("BOOL TYPES")
-  fmt.Println(bool_variable) // false
-  bool_variable = true
-  fmt.Println(bool_variable)
+  fmt.Println(boolVariable) // false
+  boolVariable = true
+  fmt.Println(boolVariable)
   comparassion01 := 10
   comparassion02 := 20
   fmt.Println(comparassion01, comparassion02 )
@@ -28,18 +58,18 @@ func main()  {
 
   // Numerical Types
   fmt.Println("NUMERICAL TYPES")
-  int_variable01 := 2
-  float_variable01 := .2
-  fmt.Println(int_variable01)
-  fmt.Printf("%T\n", int_variable01)
-  fmt.Println(float_variable01)
-  fmt.Printf("%T\n", float_variable01)
-  int_variable02 = 4
-  float_variable02 = .4
-  fmt.Println(int_variable02)
-  fmt.Printf("%T\n", int_variable02)
-  fmt.Println(float_variable02)
-  fmt.Printf("%T\n", float_variable02)
+  intVariable01 := 2
+  floatVariable01 := .2
+  fmt.Println(intVariable01)
+  fmt.Printf("%T\n", intVariable01)
+  fmt.Println(floatVariable01)
+  fmt.Printf("%T\n", floatVariable01)
+  intVariable02 = 4
+  floatVariable02 = .4
+  fmt.Println(intVariable02)
+  fmt.Printf("%T\n", intVariable02)
+  fmt.Println(floatVariable02)
+  fmt.Printf("%T\n", floatVariable02)
 
   // uint8       the set of all unsigned  8-bit integers (0 to 255)
   // uint16      the set of all unsigned 16-bit integers (0 to 65535)
@@ -66,27 +96,60 @@ func main()  {
 
   // String Type
 
-  string_variable01 := "Hello World"
-  fmt.Printf("%T\n", string_variable01)
-  fmt.Println(string_variable01)
+  stringVariable01 := "Hello World"
+  fmt.Printf("%T\n", stringVariable01)
+  fmt.Println(stringVariable01)
 
-  sliced_of_byte := []byte(string_variable01)
-  fmt.Println(sliced_of_byte)
-  fmt.Printf("%T\n", sliced_of_byte)
+  slicedOfByte := []byte(stringVariable01)
+  fmt.Println(slicedOfByte)
+  fmt.Printf("%T\n", slicedOfByte)
 
-  for i := 0; i < len(sliced_of_byte); i++ {
-    fmt.Printf("%#U ", sliced_of_byte[i])
+  for i := 0; i < len(slicedOfByte); i++ {
+    fmt.Printf("%#U ", slicedOfByte[i])
   }
 
   fmt.Println("")
 
-  for i, v := range sliced_of_byte {
+  for i, v := range slicedOfByte {
     fmt.Println(i, v)
   }
 
-  for i, v := range sliced_of_byte {
+  for i, v := range slicedOfByte {
 		fmt.Printf("at index position %d we have hex %#x\n", i, v)
 	}
+
+  // Constants
+  // const name type = value
+
+  fmt.Println(constVariable)
+  fmt.Printf("%T\n", constVariable)
+
+  // Iota
+
+  fmt.Println(iotaA)
+  fmt.Println(iotaB)
+  fmt.Println(iotaC)
+  fmt.Printf("%T\n", iotaA)
+  fmt.Printf("%T\n", iotaB)
+  fmt.Printf("%T\n", iotaC)
+
+  fmt.Println(iotaAA)
+  fmt.Println(iotaBB)
+  fmt.Println(iotaCC)
+  fmt.Printf("%T\n", iotaAA)
+  fmt.Printf("%T\n", iotaBB)
+  fmt.Printf("%T\n", iotaCC)
+
+  // Bit Shifting
+  bit_shift_01 := 4
+  fmt.Printf("%d\t\t%b\n", bit_shift_01, bit_shift_01)
+
+  bit_shift_02 := 4 << 1
+  fmt.Printf("%d\t\t%b\n", bit_shift_02, bit_shift_02)
+
+  fmt.Printf("%d\t\t\t%b\n", kb, kb)
+  fmt.Printf("%d\t\t\t%b\n", mb, mb)
+  fmt.Printf("%d\t\t\t%b\n", gb, gb)
 
 
 

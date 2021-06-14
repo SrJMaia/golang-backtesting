@@ -4,8 +4,8 @@ import "fmt"
 
 // if you declare a variable outside a function uses var
 // when use var, you dont use :=
-var outside_func = 10
-var i_outside int // is the same as var i_outside int = 0
+var outsideFunc = 10
+var iOutside int // is the same as var iOutside int = 0
 // The value of 0 will be definied to int, for float will be 0.0
 // bool == false, string == ""
 var text string = "Someone said: 'teste12'"
@@ -15,8 +15,8 @@ type hotdog int
 var b hotdog
 
 func main()  {
-  number_bytes, erros := fmt.Println("Teste", 42, true)
-  fmt.Println(number_bytes)
+  numberBytes, erros := fmt.Println("Teste", 42, true)
+  fmt.Println(numberBytes)
   fmt.Println(erros)
   teste, _ := fmt.Println("Teste", 42, true)
   fmt.Println(teste)
@@ -43,12 +43,12 @@ func main()  {
 
 
   // ---------------- fmt package
-  fmt.Println(outside_func)
-  fmt.Printf("%T\n", outside_func) // type
-  fmt.Printf("%b\n", outside_func) // binary
-  fmt.Printf("%x\n", outside_func) // hexadecimal
-  fmt.Printf("%#x\n", outside_func) // hexadecimal with 0x
-  fmt.Printf("%#x\t%b\t%x", outside_func, outside_func, outside_func) // hexadecimal with 0x, binary, hexadecimal
+  fmt.Println(outsideFunc)
+  fmt.Printf("%T\n", outsideFunc) // type
+  fmt.Printf("%b\n", outsideFunc) // binary
+  fmt.Printf("%x\n", outsideFunc) // hexadecimal
+  fmt.Printf("%#x\n", outsideFunc) // hexadecimal with 0x
+  fmt.Printf("%#x\t%b\t%x", outsideFunc, outsideFunc, outsideFunc) // hexadecimal with 0x, binary, hexadecimal
 
 
   // ---------------- creating your own type
