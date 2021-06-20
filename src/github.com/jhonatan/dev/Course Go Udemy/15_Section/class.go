@@ -2,6 +2,7 @@ package main
 
 import (
   "fmt"
+  "fibonacci"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
   // go doc Println
 
   // godoc -http=: 8080 -> localhost:8080
+  fibonacci.Fibo(10)
 
 
 }
