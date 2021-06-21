@@ -1,4 +1,5 @@
 package main
+
 /*
 Ler o csv
 Salvar o csv
@@ -6,16 +7,17 @@ Backtest
 Analise dos resultados
 */
 import (
-  "fmt"
-  "github.com/SrJMaia/EA/data"
+	"fmt"
+
+	"github.com/SrJMaia/EA/data"
 )
 
 func main() {
-  var emp = data.ReadData()
+	var emp = data.ReadData()
 
-  xii := emp.open[:10]
-  fmt.Println(xii)
-  fmt.Println(len(emp.open))
+	xii := emp.Open[:10]
+	fmt.Println(xii)
+	fmt.Println(len(emp.Open))
 
-  //data.SaveData(emp)
+	data.SaveData(emp)
 }
