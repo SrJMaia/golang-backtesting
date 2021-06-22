@@ -5,24 +5,29 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/SrJMaia/EA/check"
+	"github.com/SrJMaia/EA/conversion"
 )
 
-type DataStruct struct {
-	Open     []float64
-	High     []float64
-	Low      []float64
-	Close    []float64
-	Pricetf  []float64
-	Tpsl     []float64
-	SellFlag []bool
-	BuyFlag  []bool
-}
+const ArrayLen = 7747555
 
-func ReadData() DataStruct {
+type DataBacktest [8][ArrayLen]float64
 
-	var openSlice, highSlice, lowSlice, closeSlice = []float64{}, []float64{}, []float64{}, []float64{}
-	var pricetfSlice, tpslSlice = []float64{}, []float64{}
-	var sellFlagSlice, buyFlagSlice = []bool{}, []bool{}
+/*
+[0] Open
+[1] High
+[2] Low
+[3] Close
+[4] Preços do TimeFrame
+[5] TPSL
+[6] Sell Flag
+[7] Buy Flag
+*/
+
+func ReadData() DataBacktest {
+
+	var myData DataBacktest
 
 	var openValue float64
 	var highValue float64
@@ -34,94 +39,55 @@ func ReadData() DataStruct {
 	var buyFlagValue bool
 
 	csvFile, err := os.Open("C:/Users/johnk/Google Drive/Programming/Dados/testdata.csv")
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 	fmt.Println("Successfully Opened CSV file")
 	defer csvFile.Close()
 
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
-	for _, v := range csvLines {
+	for i, v := range csvLines {
 
 		// Could I use fmt.Sprintf(".5f") to get the precision?
 
 		openValue, err = strconv.ParseFloat(v[0], 64)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		openSlice = append(openSlice, openValue)
+		check.CheckError(err)
+		myData[0][i] = openValue
 
 		highValue, err = strconv.ParseFloat(v[1], 64)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		highSlice = append(highSlice, highValue)
+		check.CheckError(err)
+		myData[1][i] = highValue
 
 		lowValue, err = strconv.ParseFloat(v[2], 64)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		lowSlice = append(lowSlice, lowValue)
+		check.CheckError(err)
+		myData[2][i] = lowValue
 
 		closeValue, err = strconv.ParseFloat(v[3], 64)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		closeSlice = append(closeSlice, closeValue)
+		check.CheckError(err)
+		myData[3][i] = closeValue
 
 		pricetfValue, err = strconv.ParseFloat(v[4], 64)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		pricetfSlice = append(pricetfSlice, pricetfValue)
+		check.CheckError(err)
+		myData[4][i] = pricetfValue
 
 		tpslValue, err = strconv.ParseFloat(v[5], 64)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		tpslSlice = append(tpslSlice, tpslValue)
+		check.CheckError(err)
+		myData[5][i] = tpslValue
 
 		sellFlagValue, err = strconv.ParseBool(v[6])
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		sellFlagSlice = append(sellFlagSlice, sellFlagValue)
+		check.CheckError(err)
+		myData[6][i] = conversion.BoolToFloat(sellFlagValue)
 
 		buyFlagValue, err = strconv.ParseBool(v[7])
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		buyFlagSlice = append(buyFlagSlice, buyFlagValue)
+		check.CheckError(err)
+		myData[7][i] = conversion.BoolToFloat(buyFlagValue)
 
 	}
 
-	var emp = DataStruct{
-		Open:     openSlice,
-		High:     highSlice,
-		Low:      lowSlice,
-		Close:    closeSlice,
-		Pricetf:  pricetfSlice,
-		Tpsl:     tpslSlice,
-		SellFlag: sellFlagSlice,
-		BuyFlag:  buyFlagSlice,
-	}
-
-	return emp
+	return myData
 }
 
-func SaveData(data DataStruct) {
+func SaveData(data DataBacktest) {
 
 	var openValue []string
 	var highValue []string
@@ -133,65 +99,46 @@ func SaveData(data DataStruct) {
 	var buyFlagValue []string
 
 	var file, err = os.Create("C:/Users/johnk/Google Drive/Programming/Dados/results.csv")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	check.CheckError(err)
 	defer file.Close()
 
 	var writer = csv.NewWriter(file)
 	defer writer.Flush()
 
-	for i := range data.Open {
-		openValue = append(openValue, strconv.FormatFloat(data.Open[i], 'E', -1, 64))
-		highValue = append(highValue, strconv.FormatFloat(data.High[i], 'E', -1, 64))
-		lowValue = append(lowValue, strconv.FormatFloat(data.Low[i], 'E', -1, 64))
-		closeValue = append(closeValue, strconv.FormatFloat(data.Close[i], 'E', -1, 64))
-		pricetfValue = append(pricetfValue, strconv.FormatFloat(data.Pricetf[i], 'E', -1, 64))
-		tpslValue = append(tpslValue, strconv.FormatFloat(data.Tpsl[i], 'E', -1, 64))
-		sellFlagValue = append(sellFlagValue, strconv.FormatBool(data.SellFlag[i]))
-		buyFlagValue = append(buyFlagValue, strconv.FormatBool(data.BuyFlag[i]))
+	for i := range data[0] {
+		openValue = append(openValue, strconv.FormatFloat(data[0][i], 'E', -1, 64))
+		highValue = append(highValue, strconv.FormatFloat(data[1][i], 'E', -1, 64))
+		lowValue = append(lowValue, strconv.FormatFloat(data[2][i], 'E', -1, 64))
+		closeValue = append(closeValue, strconv.FormatFloat(data[3][i], 'E', -1, 64))
+		pricetfValue = append(pricetfValue, strconv.FormatFloat(data[4][i], 'E', -1, 64))
+		tpslValue = append(tpslValue, strconv.FormatFloat(data[5][i], 'E', -1, 64))
+		sellFlagValue = append(sellFlagValue, strconv.FormatBool(conversion.FloatToBool(data[6][i])))
+		buyFlagValue = append(buyFlagValue, strconv.FormatBool(conversion.FloatToBool(data[7][i])))
 	}
 
 	err = writer.Write(openValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(highValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(lowValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(closeValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(pricetfValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(tpslValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(sellFlagValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	err = writer.Write(buyFlagValue)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check.CheckError(err)
 
 	fmt.Println("Data Saved.")
 }
