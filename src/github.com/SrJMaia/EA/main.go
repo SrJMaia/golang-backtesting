@@ -9,15 +9,20 @@ Analise dos resultados
 import (
 	"fmt"
 
+	"github.com/SrJMaia/EA/backtest"
 	"github.com/SrJMaia/EA/data"
 )
 
 func main() {
-	var emp = data.ReadData()
+	var data = data.ReadData()
 
-	xii := emp.Open[:10]
+	xii := data[0][:10]
 	fmt.Println(xii)
-	fmt.Println(len(emp.Open))
+	fmt.Println(len(data[0]))
 
-	data.SaveData(emp)
+	var buy, sell = backtest.SumArrayToBacktest(data)
+
+	fmt.Println("Buy:", buy, "Sell:", sell)
+
+	// data.SaveData(data)
 }
