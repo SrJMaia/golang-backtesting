@@ -23,7 +23,7 @@ type LayoutData struct {
 
 func ReadData(isJpy bool) LayoutData {
 
-	var roundPlace float64
+	var roundPlace int
 	if isJpy {
 		roundPlace = 3
 	} else {
@@ -41,7 +41,6 @@ func ReadData(isJpy bool) LayoutData {
 
 	csvFile, err := os.Open("C:/Users/johnk/Google Drive/Programming/Dados/testdata.csv")
 	check.MyCheckingError(err)
-
 	defer csvFile.Close()
 
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
@@ -183,4 +182,57 @@ func SaveData(data LayoutData) {
 	}
 
 	fmt.Println("Data Saved.")
+}
+
+func SaveBacktest(tot []float64, buy []float64, sell []float64, columns float64, first bool) {
+
+	var totValue = make([]string, len(tot)+1)
+	var buyValue = make([]string, len(buy)+1)
+	var sellValue = make([]string, len(sell)+1)
+	var index = make([]string, len(tot)*2)
+
+	var file, err = os.OpenFile("C:/Users/johnk/Google Drive/Programming/Dados/BacktestResults.csv", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	check.MyCheckingError(err)
+	defer file.Close()
+
+	var writer = csv.NewWriter(file)
+	defer writer.Flush()
+
+	var s string = fmt.Sprintf("%f", columns)
+
+	totValue[0] = s
+	buyValue[0] = s
+	sellValue[0] = s
+	index[0] = "0"
+
+	for i := 1; i < len(tot); i++ {
+		totValue[i] = strconv.FormatFloat(tot[i], 'E', -1, 64)
+	}
+	for i := 1; i < len(buy); i++ {
+		buyValue[i] = strconv.FormatFloat(buy[i], 'E', -1, 64)
+	}
+	for i := 1; i < len(sell); i++ {
+		sellValue[i] = strconv.FormatFloat(sell[i], 'E', -1, 64)
+	}
+
+	if first {
+		for i := 1; i < len(index); i++ {
+			s = fmt.Sprintf("%d", i)
+			index[i] = s
+		}
+
+		err = writer.Write(index)
+		check.MyCheckingError(err)
+	}
+
+	err = writer.Write(totValue)
+	check.MyCheckingError(err)
+
+	err = writer.Write(buyValue)
+	check.MyCheckingError(err)
+
+	err = writer.Write(sellValue)
+	check.MyCheckingError(err)
+
+	fmt.Println("Backtest Saved.")
 }

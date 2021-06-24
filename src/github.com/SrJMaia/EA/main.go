@@ -45,5 +45,18 @@ func main() {
 	fmt.Println(sell[len(sell)-5:])
 	fmt.Println("Total Trades:", len(tot))
 
+	fmt.Println()
+
+	fmt.Println(len(tot))
+	fmt.Println(len(buy))
+	fmt.Println(len(sell))
+
+	var first bool = true
+	for i := 0.5; i < 1.5; i += 0.5 {
+		tot, buy, sell = backtest.HedgingBacktest(&dt, i, 0.5, 1000., buySum, sellSum, jpy)
+		data.SaveBacktest(tot, buy, sell, i, first)
+		first = false
+	}
+
 	//data.SaveData(dt)
 }

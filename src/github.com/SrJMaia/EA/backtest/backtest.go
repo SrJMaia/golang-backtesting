@@ -1,6 +1,9 @@
 package backtest
 
 import (
+	"log"
+	"math"
+
 	"github.com/SrJMaia/EA/conversion"
 	"github.com/SrJMaia/EA/data"
 )
@@ -48,6 +51,7 @@ func financeCalculation(balance float64, initialPrice float64, finalPrice float6
 	var lot float64
 	var comission float64
 	var result float64
+	var total float64
 	if leverage && balance > 3*initialBalance {
 		lot = conversion.Round((balance - initialBalance), -3)
 	} else {
@@ -55,19 +59,24 @@ func financeCalculation(balance float64, initialPrice float64, finalPrice float6
 	}
 	comission = lot / 1000 * .07
 
-	result = conversion.Round((lot*(initialPrice-finalPrice))/eurPrice-comission, 2)
-	return (result + balance), result
+	result = conversion.Round((lot*(initialPrice-finalPrice))/eurPrice-comission, 5)
+	total = conversion.Round(result+balance, 2)
+
+	if math.IsNaN(total) || total == 0 {
+		log.Panic("Finance Calculation Error. NaN or 0")
+	}
+	return total, result
 
 }
 
 func tpslCalculationFix(price float64, multiplyTpF float64, multiplySlF float64, jpyRound bool, buy bool) (float64, float64) {
 	var tp float64
 	var sl float64
-	var roundTPSL float64
+	var roundTPSL int
 	if jpyRound {
-		roundTPSL = 3.
+		roundTPSL = 3
 	} else {
-		roundTPSL = 5.
+		roundTPSL = 5
 	}
 	if buy {
 		tp = conversion.Round(price+multiplyTpF, roundTPSL)
@@ -83,11 +92,11 @@ func tpslCalculationNonFix(price float64, multiplyTpF float64, multiplySlF float
 	// Example: ATR
 	var tp float64
 	var sl float64
-	var roundTPSL float64
+	var roundTPSL int
 	if jpyRound {
-		roundTPSL = 3.
+		roundTPSL = 3
 	} else {
-		roundTPSL = 5.
+		roundTPSL = 5
 	}
 	if buy {
 		tp = conversion.Round(price+(multiplyTpF*tpSlValue), roundTPSL)
@@ -166,7 +175,7 @@ func HedgingBacktest(dt *data.LayoutData, multiplyTpB float64, multiplySlB float
 				}
 				if backtestMain.updateBuy {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
-					backtestMain.buyTrades[backtestMain.iBuy] = backtestMain.buyTrades[backtestMain.iBuy-1] + backtestMain.buyResult
+					backtestMain.buyTrades[backtestMain.iBuy] = conversion.Round(backtestMain.buyTrades[backtestMain.iBuy-1]+backtestMain.buyResult, 2)
 					backtestMain.iTotalTrades++
 					backtestMain.iBuy++
 					backtestMain.buyFlag = true
@@ -186,7 +195,7 @@ func HedgingBacktest(dt *data.LayoutData, multiplyTpB float64, multiplySlB float
 				}
 				if backtestMain.updateSell {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
-					backtestMain.sellTrades[backtestMain.iSell] = backtestMain.sellTrades[backtestMain.iSell-1] + backtestMain.sellResult
+					backtestMain.sellTrades[backtestMain.iSell] = conversion.Round(backtestMain.sellTrades[backtestMain.iSell-1]+backtestMain.sellResult, 2)
 					backtestMain.iTotalTrades++
 					backtestMain.iSell++
 					backtestMain.sellFlag = true
@@ -238,7 +247,7 @@ func NettingBacktest(dt *data.LayoutData, multiplyTpB float64, multiplySlB float
 				}
 				if backtestMain.updateBuy {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
-					backtestMain.buyTrades[backtestMain.iBuy] = backtestMain.buyTrades[backtestMain.iBuy-1] + backtestMain.buyResult
+					backtestMain.buyTrades[backtestMain.iBuy] = conversion.Round(backtestMain.buyTrades[backtestMain.iBuy-1]+backtestMain.buyResult, 2)
 					backtestMain.iTotalTrades++
 					backtestMain.iBuy++
 					backtestMain.buyFlag = true
@@ -259,7 +268,7 @@ func NettingBacktest(dt *data.LayoutData, multiplyTpB float64, multiplySlB float
 				}
 				if backtestMain.updateSell {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
-					backtestMain.sellTrades[backtestMain.iSell] = backtestMain.sellTrades[backtestMain.iSell-1] + backtestMain.sellResult
+					backtestMain.sellTrades[backtestMain.iSell] = conversion.Round(backtestMain.sellTrades[backtestMain.iSell-1]+backtestMain.sellResult, 2)
 					backtestMain.iTotalTrades++
 					backtestMain.iSell++
 					backtestMain.sellFlag = true
