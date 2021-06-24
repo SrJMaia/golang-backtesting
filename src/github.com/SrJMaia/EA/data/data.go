@@ -10,7 +10,7 @@ import (
 	"github.com/SrJMaia/EA/conversion"
 )
 
-type DataStruct struct {
+type LayoutData struct {
 	Open     []float64
 	High     []float64
 	Low      []float64
@@ -21,7 +21,7 @@ type DataStruct struct {
 	BuyFlag  []bool
 }
 
-func ReadData(isJpy bool) DataStruct {
+func ReadData(isJpy bool) LayoutData {
 
 	var roundPlace float64
 	if isJpy {
@@ -40,12 +40,12 @@ func ReadData(isJpy bool) DataStruct {
 	var buyFlagValue bool
 
 	csvFile, err := os.Open("C:/Users/johnk/Google Drive/Programming/Dados/testdata.csv")
-	check.CheckError(err)
+	check.MyCheckingError(err)
 
 	defer csvFile.Close()
 
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
-	check.CheckError(err)
+	check.MyCheckingError(err)
 
 	var openSlice, highSlice = make([]float64, len(csvLines)), make([]float64, len(csvLines))
 	var lowSlice, closeSlice = make([]float64, len(csvLines)), make([]float64, len(csvLines))
@@ -58,40 +58,40 @@ func ReadData(isJpy bool) DataStruct {
 		// Change everything from append to attribution
 
 		openValue, err = strconv.ParseFloat(v[0], 64)
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		openSlice[i] = openValue
 
 		highValue, err = strconv.ParseFloat(v[1], 64)
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		highSlice[i] = highValue
 
 		lowValue, err = strconv.ParseFloat(v[2], 64)
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		lowSlice[i] = lowValue
 
 		closeValue, err = strconv.ParseFloat(v[3], 64)
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		closeSlice[i] = closeValue
 
 		pricetfValue, err = strconv.ParseFloat(v[4], 64)
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		pricetfSlice[i] = pricetfValue
 
 		tpslValue, err = strconv.ParseFloat(v[5], 64)
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		tpslSlice[i] = conversion.Round(tpslValue, roundPlace)
 
 		sellFlagValue, err = strconv.ParseBool(v[6])
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		sellFlagSlice[i] = sellFlagValue
 
 		buyFlagValue, err = strconv.ParseBool(v[7])
-		check.CheckError(err)
+		check.MyCheckingError(err)
 		buyFlagSlice[i] = buyFlagValue
 
 	}
 
-	var myData = DataStruct{
+	var myData = LayoutData{
 		Open:     openSlice,
 		High:     highSlice,
 		Low:      lowSlice,
@@ -107,7 +107,7 @@ func ReadData(isJpy bool) DataStruct {
 	return myData
 }
 
-func SaveData(data DataStruct) {
+func SaveData(data LayoutData) {
 	/*
 		There is a stackoverflow error
 	*/

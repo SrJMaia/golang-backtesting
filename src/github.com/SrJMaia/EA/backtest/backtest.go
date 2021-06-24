@@ -28,14 +28,16 @@ type backtestVariables struct {
 	sellTrades    []float64
 }
 
-func SumArrayToBacktest(data data.DataStruct) (uint32, uint32) {
+func SumArrayToBacktest(data data.LayoutData) (uint32, uint32) {
+	// Sum the true and false and return the sum
+
 	var buy uint32
 	var sell uint32
 	for i := range data.Open {
 		if data.SellFlag[i] {
-			buy += 1
+			buy++
 		} else if data.BuyFlag[i] {
-			sell += 1
+			sell++
 		}
 	}
 
@@ -51,7 +53,6 @@ func financeCalculation(balance float64, initialPrice float64, finalPrice float6
 	} else {
 		lot = 1000
 	}
-
 	comission = lot / 1000 * .07
 
 	result = conversion.Round((lot*(initialPrice-finalPrice))/eurPrice-comission, 2)
@@ -136,37 +137,38 @@ func backtestHeart(balance float64, sizeBuy uint32, sizeSell uint32) backtestVar
 	return backtestMain
 }
 
-func HedgingBacktest(dt data.DataStruct, multiplyTpB float64, multiplySlB float64, balance float64, sizeBuy uint32, sizeSell uint32, jpy bool) ([]float64, []float64, []float64) {
+func HedgingBacktest(dt *data.LayoutData, multiplyTpB float64, multiplySlB float64, balance float64, sizeBuy uint32, sizeSell uint32, jpy bool) ([]float64, []float64, []float64) {
+	// Do headging backtest and return total trades, buy trades, sell trades
 
 	var backtestMain backtestVariables = backtestHeart(balance, sizeBuy, sizeSell)
 
-	for i := 1; i < len(dt.Open); i++ {
+	for i := 1; i < len((*dt).Open); i++ {
 
-		if dt.Pricetf[i] != dt.Pricetf[i-1] {
-			if dt.BuyFlag[i] && backtestMain.buyFlag {
-				backtestMain.buyPrice = dt.Pricetf[i]
-				backtestMain.tpBuy, backtestMain.slBuy = tpslCalculationNonFix(dt.Pricetf[i], multiplyTpB, multiplySlB, dt.Tpsl[i], jpy, true)
+		if (*dt).Pricetf[i] != (*dt).Pricetf[i-1] {
+			if (*dt).BuyFlag[i] && backtestMain.buyFlag {
+				backtestMain.buyPrice = (*dt).Pricetf[i]
+				backtestMain.tpBuy, backtestMain.slBuy = tpslCalculationNonFix((*dt).Pricetf[i], multiplyTpB, multiplySlB, (*dt).Tpsl[i], jpy, true)
 				backtestMain.buyFlag = false
 			}
-			if dt.SellFlag[i] && backtestMain.sellFlag {
-				backtestMain.sellPrice = dt.Pricetf[i]
-				backtestMain.tpSell, backtestMain.slSell = tpslCalculationNonFix(dt.Pricetf[i], multiplyTpB, multiplySlB, dt.Tpsl[i], jpy, false)
+			if (*dt).SellFlag[i] && backtestMain.sellFlag {
+				backtestMain.sellPrice = (*dt).Pricetf[i]
+				backtestMain.tpSell, backtestMain.slSell = tpslCalculationNonFix((*dt).Pricetf[i], multiplyTpB, multiplySlB, (*dt).Tpsl[i], jpy, false)
 				backtestMain.sellFlag = false
 			}
-		} else if dt.Pricetf[i] == dt.Pricetf[i-1] {
+		} else if (*dt).Pricetf[i] == (*dt).Pricetf[i-1] {
 			if !backtestMain.buyFlag {
-				if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.slBuy, false) {
+				if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.slBuy, false) {
 					backtestMain.capital, backtestMain.buyResult = financeCalculation(backtestMain.capital, backtestMain.slBuy, backtestMain.buyPrice, backtestMain.slBuy, balance, false)
 					backtestMain.updateBuy = true
-				} else if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.tpBuy, true) {
+				} else if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.tpBuy, true) {
 					backtestMain.capital, backtestMain.buyResult = financeCalculation(backtestMain.capital, backtestMain.tpBuy, backtestMain.buyPrice, backtestMain.tpBuy, balance, false)
 					backtestMain.updateBuy = true
 				}
 				if backtestMain.updateBuy {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
 					backtestMain.buyTrades[backtestMain.iBuy] = backtestMain.buyTrades[backtestMain.iBuy-1] + backtestMain.buyResult
-					backtestMain.iTotalTrades += 1
-					backtestMain.iBuy += 1
+					backtestMain.iTotalTrades++
+					backtestMain.iBuy++
 					backtestMain.buyFlag = true
 					backtestMain.updateBuy = false
 					backtestMain.tpBuy = 0.
@@ -175,18 +177,18 @@ func HedgingBacktest(dt data.DataStruct, multiplyTpB float64, multiplySlB float6
 				}
 			}
 			if !backtestMain.sellFlag {
-				if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.slSell, true) {
+				if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.slSell, true) {
 					backtestMain.capital, backtestMain.sellResult = financeCalculation(backtestMain.capital, backtestMain.sellPrice, backtestMain.slSell, backtestMain.sellPrice, balance, false)
 					backtestMain.updateSell = true
-				} else if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.tpSell, false) {
+				} else if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.tpSell, false) {
 					backtestMain.capital, backtestMain.sellResult = financeCalculation(backtestMain.capital, backtestMain.sellPrice, backtestMain.tpSell, backtestMain.sellPrice, balance, false)
 					backtestMain.updateSell = true
 				}
 				if backtestMain.updateSell {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
 					backtestMain.sellTrades[backtestMain.iSell] = backtestMain.sellTrades[backtestMain.iSell-1] + backtestMain.sellResult
-					backtestMain.iTotalTrades += 1
-					backtestMain.iSell += 1
+					backtestMain.iTotalTrades++
+					backtestMain.iSell++
 					backtestMain.sellFlag = true
 					backtestMain.updateSell = false
 					backtestMain.tpSell = 0.
@@ -205,40 +207,41 @@ func HedgingBacktest(dt data.DataStruct, multiplyTpB float64, multiplySlB float6
 
 }
 
-func NettingBacktest(dt data.DataStruct, multiplyTpB float64, multiplySlB float64, balance float64, sizeBuy uint32, sizeSell uint32, jpy bool) ([]float64, []float64, []float64) {
+func NettingBacktest(dt *data.LayoutData, multiplyTpB float64, multiplySlB float64, balance float64, sizeBuy uint32, sizeSell uint32, jpy bool) ([]float64, []float64, []float64) {
+	// Do netting backtest and return total trades, buy trades, sell trades
 
 	var backtestMain backtestVariables = backtestHeart(balance, sizeBuy, sizeSell)
 
-	for i := 1; i < len(dt.Open); i++ {
+	for i := 1; i < len((*dt).Open); i++ {
 
-		if dt.Pricetf[i] != dt.Pricetf[i-1] {
-			if dt.BuyFlag[i] && backtestMain.universalFlag {
-				backtestMain.buyPrice = dt.Pricetf[i]
-				backtestMain.tpBuy, backtestMain.slBuy = tpslCalculationNonFix(dt.Pricetf[i], multiplyTpB, multiplySlB, dt.Tpsl[i], jpy, true)
-				backtestMain.buyFlag = true
+		if (*dt).Pricetf[i] != (*dt).Pricetf[i-1] {
+			if (*dt).BuyFlag[i] && backtestMain.universalFlag && backtestMain.buyFlag {
+				backtestMain.buyPrice = (*dt).Pricetf[i]
+				backtestMain.tpBuy, backtestMain.slBuy = tpslCalculationNonFix((*dt).Pricetf[i], multiplyTpB, multiplySlB, (*dt).Tpsl[i], jpy, true)
+				backtestMain.buyFlag = false
 				backtestMain.universalFlag = false
 			}
-			if dt.SellFlag[i] && backtestMain.universalFlag {
-				backtestMain.sellPrice = dt.Pricetf[i]
-				backtestMain.tpSell, backtestMain.slSell = tpslCalculationNonFix(dt.Pricetf[i], multiplyTpB, multiplySlB, dt.Tpsl[i], jpy, false)
-				backtestMain.sellFlag = true
+			if (*dt).SellFlag[i] && backtestMain.universalFlag && backtestMain.sellFlag {
+				backtestMain.sellPrice = (*dt).Pricetf[i]
+				backtestMain.tpSell, backtestMain.slSell = tpslCalculationNonFix((*dt).Pricetf[i], multiplyTpB, multiplySlB, (*dt).Tpsl[i], jpy, false)
+				backtestMain.sellFlag = false
 				backtestMain.universalFlag = false
 			}
-		} else if dt.Pricetf[i] == dt.Pricetf[i-1] {
-			if !backtestMain.universalFlag && backtestMain.buyFlag {
-				if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.slBuy, false) {
+		} else if (*dt).Pricetf[i] == (*dt).Pricetf[i-1] {
+			if !backtestMain.universalFlag && !backtestMain.buyFlag {
+				if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.slBuy, false) {
 					backtestMain.capital, backtestMain.buyResult = financeCalculation(backtestMain.capital, backtestMain.slBuy, backtestMain.buyPrice, backtestMain.slBuy, balance, false)
 					backtestMain.updateBuy = true
-				} else if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.tpBuy, true) {
+				} else if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.tpBuy, true) {
 					backtestMain.capital, backtestMain.buyResult = financeCalculation(backtestMain.capital, backtestMain.tpBuy, backtestMain.buyPrice, backtestMain.tpBuy, balance, false)
 					backtestMain.updateBuy = true
 				}
 				if backtestMain.updateBuy {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
 					backtestMain.buyTrades[backtestMain.iBuy] = backtestMain.buyTrades[backtestMain.iBuy-1] + backtestMain.buyResult
-					backtestMain.iTotalTrades += 1
-					backtestMain.iBuy += 1
-					backtestMain.buyFlag = false
+					backtestMain.iTotalTrades++
+					backtestMain.iBuy++
+					backtestMain.buyFlag = true
 					backtestMain.universalFlag = true
 					backtestMain.updateBuy = false
 					backtestMain.tpBuy = 0.
@@ -246,20 +249,20 @@ func NettingBacktest(dt data.DataStruct, multiplyTpB float64, multiplySlB float6
 					backtestMain.buyPrice = 0.
 				}
 			}
-			if !backtestMain.universalFlag && backtestMain.sellFlag {
-				if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.slSell, true) {
+			if !backtestMain.universalFlag && !backtestMain.sellFlag {
+				if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.slSell, true) {
 					backtestMain.capital, backtestMain.sellResult = financeCalculation(backtestMain.capital, backtestMain.sellPrice, backtestMain.slSell, backtestMain.sellPrice, balance, false)
 					backtestMain.updateSell = true
-				} else if checkTpslExit(dt.Open[i], dt.High[i], dt.Low[i], dt.Close[i], backtestMain.tpSell, false) {
+				} else if checkTpslExit((*dt).Open[i], (*dt).High[i], (*dt).Low[i], (*dt).Close[i], backtestMain.tpSell, false) {
 					backtestMain.capital, backtestMain.sellResult = financeCalculation(backtestMain.capital, backtestMain.sellPrice, backtestMain.tpSell, backtestMain.sellPrice, balance, false)
 					backtestMain.updateSell = true
 				}
 				if backtestMain.updateSell {
 					backtestMain.totalTrades[backtestMain.iTotalTrades] = backtestMain.capital
 					backtestMain.sellTrades[backtestMain.iSell] = backtestMain.sellTrades[backtestMain.iSell-1] + backtestMain.sellResult
-					backtestMain.iTotalTrades += 1
-					backtestMain.iSell += 1
-					backtestMain.sellFlag = false
+					backtestMain.iTotalTrades++
+					backtestMain.iSell++
+					backtestMain.sellFlag = true
 					backtestMain.universalFlag = true
 					backtestMain.updateSell = false
 					backtestMain.tpSell = 0.

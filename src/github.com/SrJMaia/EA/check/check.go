@@ -1,9 +1,18 @@
 package check
 
-import "log"
+import (
+	"log"
+	"math"
+)
 
-func CheckError(err error) {
+func MyCheckingError(err error) {
 	if err != nil {
 		log.Println("Error:", err)
+	}
+}
+
+func MyCheckingNan(value float64, index int) {
+	if math.IsNaN(value) {
+		log.Println("Nan found, index:", index)
 	}
 }

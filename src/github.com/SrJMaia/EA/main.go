@@ -1,11 +1,5 @@
 package main
 
-/*
-Ler o csv
-Salvar o csv
-Backtest
-Analise dos resultados
-*/
 import (
 	"fmt"
 	"time"
@@ -14,7 +8,7 @@ import (
 	"github.com/SrJMaia/EA/data"
 )
 
-const JPY bool = false
+const jpy bool = false
 
 func main() {
 
@@ -22,7 +16,7 @@ func main() {
 	var buy []float64
 	var sell []float64
 	start := time.Now()
-	var dt = data.ReadData(JPY)
+	var dt = data.ReadData(jpy)
 	elapsed := time.Since(start)
 	fmt.Println("Time to read:", elapsed)
 
@@ -32,8 +26,8 @@ func main() {
 	fmt.Println("Time to sum:", elapsed)
 
 	start = time.Now()
-	//tot, buy, sell = backtest.NettingBacktest(dt, 1., 0.5, 1000., buySum, sellSum, JPY)
-	tot, buy, sell = backtest.HedgingBacktest(dt, 1., 0.5, 1000., buySum, sellSum, JPY)
+	tot, buy, sell = backtest.HedgingBacktest(&dt, 1., 0.5, 1000., buySum, sellSum, jpy)
+	//tot, buy, sell = backtest.HedgingBacktest(dt, 1., 0.5, 1000., buySum, sellSum, jpy)
 	elapsed = time.Since(start)
 	fmt.Println("Time to backtest:", elapsed)
 
@@ -49,6 +43,7 @@ func main() {
 	fmt.Println(tot[len(tot)-5:])
 	fmt.Println(buy[len(buy)-5:])
 	fmt.Println(sell[len(sell)-5:])
+	fmt.Println("Total Trades:", len(tot))
 
 	//data.SaveData(dt)
 }
