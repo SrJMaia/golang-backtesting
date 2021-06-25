@@ -43,7 +43,7 @@ func main() {
 	fmt.Println(tot[len(tot)-5:])
 	fmt.Println(buy[len(buy)-5:])
 	fmt.Println(sell[len(sell)-5:])
-	fmt.Println("Total Trades:", len(tot))
+	fmt.Println("Total Trades: ", len(tot))
 
 	fmt.Println()
 
